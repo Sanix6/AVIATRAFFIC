@@ -1,14 +1,14 @@
 from pathlib import Path
 import os
 
+from django.conf.global_settings import AUTH_USER_MODEL
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-)l%w14$hgye-7v5eksw@gr=ahihf5ryy%#%#d&*=ftn)tpqn^='
 
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -20,9 +20,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'drf_spectacular',
+    'drf_yasg',
+    'django_ckeditor_5',
 
     #apps
+    'apps.users',
+    'apps.home'
+
     
 ]
 
@@ -91,25 +95,37 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
+LANGUAGE_CODE = 'ru'
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Bishkek'
 
 USE_I18N = True
 
 USE_TZ = True
 
 
-STATIC_URL = 'static/'
-STATIC_ROOT = ''
+STATIC_URL = 'drf_static/'
+MEDIA_URL = 'media/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'drf_static/')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+AUTH_USER_MODEL = 'users.User'
 
 
 #other
+
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'AERO TRAFFIC',
@@ -117,3 +133,48 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
+
+UNFOLD = {
+    "THEME": "slate", # "light", "dark", "slate"
+    "COLOR": {
+        "primary": "#4A90E2",  # основной цвет
+        "secondary": "#E94E77",  # вторичный цвет
+        "accent": "#FF5733",  # акцентный цвет
+        "background": "#F4F4F4",  # цвет фона
+        "button": "#007BFF",  # цвет кнопок
+        "text": "#333333"
+    },
+}
+
+CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+
+
+CKEDITOR_5_CONFIGS = {
+    'default': {
+        "toolbar": [
+            "heading", "|", "bold", "italic", "underline", "|",
+            "link", "blockquote", "codeBlock", "imageUpload", "|",
+            "bulletedList", "numberedList", "todoList", "|",
+            "outdent", "indent", "|",
+            "sourceEditing"
+        ],
+        "image": {
+            "toolbar": [
+                "imageTextAlternative", "|",
+                "imageStyle:alignLeft", "imageStyle:full", "imageStyle:alignRight"
+            ],
+            "styles": ["full", "alignLeft", "alignRight"]
+        },
+        "table": {
+            "contentToolbar": [
+                "tableColumn", "tableRow", "mergeTableCells"
+            ]
+        },
+        "mediaEmbed": {
+            "previewsInData": True
+        },
+    }
+}
+
+
+CKEDITOR_UPLOAD_PATH = "uploads/"

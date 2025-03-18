@@ -4,19 +4,17 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
 schema_view = get_schema_view(
-    openapi.Info(
-        title="AVIA TRAFFIC",
-        default_version="v1",
-        description="AERO TTRAFFIC API",
-        license=openapi.License(name="BSD License"),
-    ),
-    public=True,
-    permission_classes=(permissions.IsAdminUser,),
-    # url="https://hit-travel.org",
+   openapi.Info(
+      title="AVIA TRAFFIC",
+      default_version='v1',
+      description="",
+      terms_of_service="https://www.google.com/policies/terms/",
+      contact=openapi.Contact(email="contact@yourdomain.local"),
+      license=openapi.License(name="BSD License"),
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
 )
-
 doc_urlpatterns = [
-    path("api/docs.json/", schema_view.without_ui(cache_timeout=0), name="schema-json"),
-    path("", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
-    path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+    path('swagger', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
