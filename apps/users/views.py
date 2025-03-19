@@ -3,14 +3,15 @@ from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-
 #django
-from django.contrib.auth.password_validation import validate_password
+import random
+from django.utils.html import format_html
+
 
 #apps
-from .models import *
+from .models import User
 from .serializers import RegisterSerializer, ModifyPasswordSerializers, PersonalSerializers
-
+from .utils import Util
 
 class RegisterView(generics.GenericAPIView):
     queryset = User.objects.all()
@@ -19,11 +20,28 @@ class RegisterView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response({"response": True,"message": "Пользователь зарегистрирован. "
-                                 "Код для подтверждение на вашу электронную почту"}, status=status.HTTP_201_CREATED)
-        return Response({"response": False, "message": "Ошибка при регистрации пользователя."},
-                        status=status.HTTP_400_BAD_REQUEST)
+            user = serializer.save()
+
+            email_body = format_html(f"""
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #333;">Добро пожаловать, {user.first_name}!</h2>
+                    <p>Ваш код подтверждения: <strong style="font-size: 20px;">{user.code}</strong></p>
+                    <p>Введите этот код в приложении, чтобы завершить регистрацию.</p>
+                    <br>
+                    <p>С уважением,<br>Ваша команда</p>
+                </div>
+            """)
+            email_data = {
+                'email_subject': 'Подтверждение регистрации','email_body': email_body,'to_email': user.email}
+            Util.send_email(email_data)
+
+            return Response({"response": True,"message":
+                "Пользователь зарегистрирован. Код подтверждения отправлен на вашу электронную почту."
+            }, status=status.HTTP_201_CREATED)
+
+        return Response({"response": False,
+            "message": "Ошибка при регистрации пользователя."
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PersonalView(viewsets.ViewSet):

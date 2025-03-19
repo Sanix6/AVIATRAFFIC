@@ -9,6 +9,7 @@ urlpatterns = [
     path('', include('apps.users.urls')),
     path('', include('apps.home.urls')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
+    path("monitor", include("django_prometheus.urls")),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += doc_urlpatterns
