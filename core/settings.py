@@ -1,12 +1,14 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = os.getenv('DEBUG')
+DEBUG = True
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS')
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -22,9 +24,10 @@ INSTALLED_APPS = [
     'django_ckeditor_5',
 
     #apps
+    'apps.avia',
     'apps.users',
     'apps.home',
-    'apps.avia'
+    'apps.notifications'
 
     
 ]
@@ -67,7 +70,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 #database
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('ENGINE'),
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('POSTGRES_DB'),
         'USER': os.getenv('POSTGRES_USER'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
@@ -177,3 +180,6 @@ CKEDITOR_5_CONFIGS = {
 }
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
+
+ONE_SIGNAL_APP_ID  = os.getenv('APP_ID')
+ONE_SIGNAL_REST = os.getenv('REST_API')

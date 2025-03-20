@@ -35,7 +35,7 @@ class Cities(models.Model):
 
 
 class Airports(models.Model):
-    main = models.ForeignKey(Cities, related_name="airports", on_delete=models.CASCADE)
+    aero = models.ForeignKey(Cities, related_name="airports", on_delete=models.CASCADE)
     name = models.CharField(_('Аэропрт'), max_length=200)
     code_name = models.CharField(_('Код аэропорта'), max_length=3, help_text='FRU')
 
