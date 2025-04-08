@@ -8,8 +8,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.users.urls')),
     path('', include('apps.home.urls')),
+    path('', include('apps.avia.urls')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
-    path("monitor", include("django_prometheus.urls")),
 
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += doc_urlpatterns

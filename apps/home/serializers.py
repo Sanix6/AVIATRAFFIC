@@ -14,7 +14,7 @@ class PopularDirectionSerializers(serializers.ModelSerializer):
 class SubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
-        fields = ['title', 'description']
+        fields = ['title', 'slug','description']
 
 class CategorySerializers(serializers.ModelSerializer):
     subcategory = SubCategorySerializer(many=True)

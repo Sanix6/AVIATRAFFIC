@@ -18,8 +18,8 @@ class DeviceToken(models.Model):
 
 class Notifications(models.Model):
     devices = models.ManyToManyField("DeviceToken", blank=True)
-    title = models.CharField(_('Уведомление'), max_length=255)
-    description = CKEditor5Field(_("Описание"), blank=True, null=True)
+    title = models.CharField(_('Уведомление'),  max_length=255)
+    description = CKEditor5Field(_("Описание"),config_name='default', blank=True, null=True)
     sendtoall = models.BooleanField(_("Отправить всем"), default=True)
     image = models.ImageField(_('Изображение'), upload_to='notifications/', null=True, blank=True)
 

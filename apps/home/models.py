@@ -54,10 +54,19 @@ class Category(models.Model):
         verbose_name = 'Информация в главном экране'
         verbose_name_plural = 'Информации в главном экране'
 
+
 class SubCategory(models.Model):
     cat = models.ForeignKey(to=Category, on_delete=models.CASCADE, verbose_name='Категория', related_name='subcategory')
     title = models.CharField(_('Название'), max_length=300)
+    slug = models.SlugField('СЛАГ', editable=False, unique=True, null=True, blank=True)
     description = CKEditor5Field(_('Описание'), config_name='default', blank=True, null=True)
+
+
+    def save(self, *args, **kwargs):
+        if not self.slug and self.title:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+
 
     def __str__(self):
         return self.title

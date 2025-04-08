@@ -94,10 +94,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-}
-
 LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'Asia/Bishkek'
@@ -108,9 +104,10 @@ USE_TZ = True
 
 
 STATIC_URL = 'drf_static/'
-MEDIA_URL = 'media/'
-
 STATIC_ROOT = os.path.join(BASE_DIR, 'drf_static/')
+
+
+MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 
@@ -151,7 +148,6 @@ UNFOLD = {
 
 CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
-
 CKEDITOR_5_CONFIGS = {
     'default': {
         "toolbar": [
@@ -176,10 +172,49 @@ CKEDITOR_5_CONFIGS = {
         "mediaEmbed": {
             "previewsInData": True
         },
+        "link": {
+            "decorators": [
+                {
+                    "model": "link",
+                    "view": {
+                        "name": "a",
+                        "attributes": {"target": "_blank"}
+                    },
+                    "label": "Open in new tab",
+                    "defaultValue": True
+                }
+            ]
+        },
+        "placeholder": "Start typing here...",
+        "autogrow": True,
+        "spellcheck": True,
+        "language": "ru",
     }
 }
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 
+
 ONE_SIGNAL_APP_ID  = os.getenv('APP_ID')
 ONE_SIGNAL_REST = os.getenv('REST_API')
+
+
+JAZZMIN_SETTINGS = {
+    "site_logo": "Logo_avia.png",
+    "site_brand": "AeroTraffic",
+    "icons": {
+        "home.Banner": "fas fa-image",
+        "home.PopularDirection": "fas fa-map-marked-alt",
+        "home.Category": "fas fa-th-list",
+        "home.SubCategory": "fas fa-layer-group",
+
+        "avia.Countries": "fas fa-flag",
+        "avia.Cities": "fas fa-city",
+        "avia.Airports": "fas fa-plane",
+
+        "notifications.DeviceToken": "fas fa-mobile-alt",
+        "notifications.Notifications": "fas fa-bell",
+
+        "users.User": "fas fa-user",
+    },
+}
