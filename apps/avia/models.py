@@ -1,6 +1,17 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+
+
+#apps
+from apps.users.models import User
+from assets.choices import *
+
+class Orders(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user', verbose_name=_('Заказчик'))
+    cabin = models.CharField(_('Класс бронирования'),choices=CABIN_CHOICES,  max_length=25)
+
+
 class Airports(models.Model):
     name = models.CharField(_('Аэропрт'), max_length=200)
     code_name = models.CharField(_('Код аэропорта'), max_length=3, help_text='FRU')

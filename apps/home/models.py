@@ -4,7 +4,6 @@ from django.utils.text import slugify
 from django_ckeditor_5.fields import CKEditor5Field
 from assets.choices import LANG
 
-
 class Banner(models.Model):
     language = models.CharField(_("Язык"), choices=LANG, default='ru', max_length=25)
     image = models.ImageField(_("Изображение"), upload_to='banners/')
@@ -51,15 +50,15 @@ class Category(models.Model):
         return self.title
 
     class Meta:
-        verbose_name = 'Информация в главном экране'
-        verbose_name_plural = 'Информации в главном экране'
+        verbose_name = 'Информация'
+        verbose_name_plural = 'Информации'
 
 
 class SubCategory(models.Model):
     cat = models.ForeignKey(to=Category, on_delete=models.CASCADE, verbose_name='Категория', related_name='subcategory')
     title = models.CharField(_('Название'), max_length=300)
     slug = models.SlugField('СЛАГ', editable=False, unique=True, null=True, blank=True)
-    description = CKEditor5Field(_('Описание'), config_name='default', blank=True, null=True)
+    description = CKEditor5Field(_('Информация'), config_name='default', blank=True, null=True)
 
 
     def save(self, *args, **kwargs):
