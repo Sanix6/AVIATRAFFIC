@@ -16,7 +16,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'first_name', 'last_name', 'password', 'confirm_password')
+        fields = ('email', 'first_name', 'phone','password', 'confirm_password')
 
     def validate(self, attrs):
         password = attrs.get("password")
@@ -47,6 +47,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class ModifyPasswordSerializers(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True, required=True, min_length=8,
                                              error_messages={"min_length": "Не менее 8 символов."})
     class Meta:
@@ -62,14 +63,22 @@ class ModifyPasswordSerializers(serializers.ModelSerializer):
 
         return attrs
 
+class LoginSerializer(serializers.Serializer):
+    phone = serializers.CharField(required=True)
+    password = serializers.CharField(
+        write_only=True,
+        min_length=4,
+        required=True,
+        error_messages={"min_length": "Не менее 4 символов."},
+    )
+    
+
 class PersonalSerializers(serializers.ModelSerializer):
-    full_name = serializers.SerializerMethodField()
+    first_name = serializers.CharField(write_only=True)
+    email = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['full_name', 'email']
-
-    def get_full_name(self, obj):
-        return f"{obj.first_name} {obj.last_name}"
+        fields = ['first_name', 'email']
 
 

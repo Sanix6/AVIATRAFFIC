@@ -12,7 +12,7 @@ class UserAdmin(UserAdmin):
     list_display_links = ['id', 'email', 'first_name', 'last_name']
     ordering = ['-id']
     fieldsets = (
-        ('Основаная информация', {'fields': ('email',  'summ', 'logo',  'first_name','last_name')}),
+        ('Основаная информация', {'fields': ('email','phone','first_name','last_name')}),
         ('Права', {'fields': ('is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Важные даты', {'fields': ('last_login', 'date_joined')}),
         ('Активация', {'fields': ('is_active', 'code')}))

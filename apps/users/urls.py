@@ -7,6 +7,7 @@ router = DefaultRouter()
 router.register(r'user', PersonalView, basename='auth')
 
 urlpatterns = [
-    path('user/register/', RegisterView.as_view(), name='auth-register'),
+    path('user/register', RegisterView.as_view(), name='auth-register'),
+    path('user/login', LoginView.as_view(), name='auth-login'),
     path('', include(router.urls)),
 ]

@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'drf_yasg',
     'django_ckeditor_5',
@@ -111,6 +112,33 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://77.222.58.149",
+    "http://localhost:5176",  
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://77.222.58.149",
+    "http://localhost:5176", 
+]
+
+CORS_ALLOW_METHODS = (
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+    "DELETE"
+)
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'
@@ -147,50 +175,100 @@ UNFOLD = {
 }
 
 CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+customColorPalette = [
+        {
+            'color': 'hsl(4, 90%, 58%)',
+            'label': 'Red'
+        },
+        {
+            'color': 'hsl(340, 82%, 52%)',
+            'label': 'Pink'
+        },
+        {
+            'color': 'hsl(291, 64%, 42%)',
+            'label': 'Purple'
+        },
+        {
+            'color': 'hsl(262, 52%, 47%)',
+            'label': 'Deep Purple'
+        },
+        {
+            'color': 'hsl(231, 48%, 48%)',
+            'label': 'Indigo'
+        },
+        {
+            'color': 'hsl(207, 90%, 54%)',
+            'label': 'Blue'
+        },
+    ]
 
 CKEDITOR_5_CONFIGS = {
     'default': {
-        "toolbar": [
-            "heading", "|", "bold", "italic", "underline", "|",
-            "link", "blockquote", "codeBlock", "imageUpload", "|",
-            "bulletedList", "numberedList", "todoList", "|",
-            "outdent", "indent", "|",
-            "sourceEditing"
+        'toolbar': {
+            'items': ['heading', '|', 'bold', 'italic', 'link',
+                      'bulletedList', 'numberedList', 'blockQuote', 'imageUpload', ],
+                    }
+
+    },
+    'extends': {
+        'blockToolbar': [
+            'paragraph', 'heading1', 'heading2', 'heading3',
+            '|',
+            'bulletedList', 'numberedList',
+            '|',
+            'blockQuote',
         ],
-        "image": {
-            "toolbar": [
-                "imageTextAlternative", "|",
-                "imageStyle:alignLeft", "imageStyle:full", "imageStyle:alignRight"
-            ],
-            "styles": ["full", "alignLeft", "alignRight"]
+        'toolbar': {
+            'items': ['heading', '|', 'outdent', 'indent', '|', 'bold', 'italic', 'link', 'underline', 'strikethrough',
+                      'code','subscript', 'superscript', 'highlight', '|', 'codeBlock', 'sourceEditing', 'insertImage',
+                    'bulletedList', 'numberedList', 'todoList', '|',  'blockQuote', 'imageUpload', '|',
+                    'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'mediaEmbed', 'removeFormat',
+                    'insertTable',
+                    ],
+            'shouldNotGroupWhenFull': True
         },
-        "table": {
-            "contentToolbar": [
-                "tableColumn", "tableRow", "mergeTableCells"
+        'image': {
+            'toolbar': ['imageTextAlternative', '|', 'imageStyle:alignLeft',
+                        'imageStyle:alignRight', 'imageStyle:alignCenter', 'imageStyle:side',  '|'],
+            'styles': [
+                'full',
+                'side',
+                'alignLeft',
+                'alignRight',
+                'alignCenter',
             ]
+
         },
-        "mediaEmbed": {
-            "previewsInData": True
+        'table': {
+            'contentToolbar': [ 'tableColumn', 'tableRow', 'mergeTableCells',
+            'tableProperties', 'tableCellProperties' ],
+            'tableProperties': {
+                'borderColors': customColorPalette,
+                'backgroundColors': customColorPalette
+            },
+            'tableCellProperties': {
+                'borderColors': customColorPalette,
+                'backgroundColors': customColorPalette
+            }
         },
-        "link": {
-            "decorators": [
-                {
-                    "model": "link",
-                    "view": {
-                        "name": "a",
-                        "attributes": {"target": "_blank"}
-                    },
-                    "label": "Open in new tab",
-                    "defaultValue": True
-                }
+        'heading' : {
+            'options': [
+                { 'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph' },
+                { 'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1' },
+                { 'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2' },
+                { 'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3' }
             ]
-        },
-        "placeholder": "Start typing here...",
-        "autogrow": True,
-        "spellcheck": True,
-        "language": "ru",
+        }
+    },
+    'list': {
+        'properties': {
+            'styles': 'true',
+            'startIndex': 'true',
+            'reversed': 'true',
+        }
     }
 }
+
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 
@@ -205,8 +283,8 @@ JAZZMIN_SETTINGS = {
     "icons": {
         "home.Banner": "fas fa-image",
         "home.PopularDirection": "fas fa-map-marked-alt",
-        "home.Category": "fas fa-th-list",
-        "home.SubCategory": "fas fa-layer-group",
+        "home.Information": "fas fa-th-list",
+        "home.SubInformation": "fas fa-layer-group",
 
         "avia.Countries": "fas fa-flag",
         "avia.Cities": "fas fa-city",

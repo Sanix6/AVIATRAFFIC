@@ -8,13 +8,8 @@ class Banner(models.Model):
     language = models.CharField(_("Язык"), choices=LANG, default='ru', max_length=25)
     image = models.ImageField(_("Изображение"), upload_to='banners/')
     title = models.CharField(_('Название'), max_length=255, null=True, blank=True)
-    slug = models.SlugField('СЛАГ', editable=False, unique=True)
+    slug = models.SlugField('СЛАГ', unique=True, blank=True)
     description = models.TextField(_('Текст'), null=True, blank=True)
-
-    def save(self, *args, **kwargs):
-        if not self.slug and self.title:
-            self.slug = slugify(self.title)
-        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _("Баннер")
@@ -23,28 +18,20 @@ class Banner(models.Model):
 class PopularDirection(models.Model):
     language = models.CharField(_("Язык"), choices=LANG, default='ru', max_length=25)
     name = models.CharField(_("Город"), max_length=255)
-    slug = models.SlugField('СЛАГ', editable=False, unique=True)
+    slug = models.SlugField('СЛАГ', unique=True, blank=True)
     image = models.ImageField(_("Изображение"), upload_to="directions/")
-
-    def save(self, *args, **kwargs):
-        if not self.slug and self.name:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Популярная направления'
         verbose_name_plural = 'Популярные направлении'
 
 
-class Category(models.Model):
+class Information(models.Model):
     language = models.CharField(_("Язык"), choices=LANG, default='ru', max_length=255)
     title = models.CharField(_('Название'), max_length=255)
-    slug = models.SlugField('СЛАГ',editable=False, unique=True)
-
-    def save(self, *args, **kwargs):
-        if not self.slug and self.title:
-            self.slug = slugify(self.title)
-        super().save(*args, **kwargs)
+    slug = models.SlugField('СЛАГ', unique=True, blank=True)
+    img = models.ImageField('Логотип', upload_to='informations/')
+    description = CKEditor5Field(_('Информация'), config_name='default', blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -54,10 +41,10 @@ class Category(models.Model):
         verbose_name_plural = 'Информации'
 
 
-class SubCategory(models.Model):
-    cat = models.ForeignKey(to=Category, on_delete=models.CASCADE, verbose_name='Категория', related_name='subcategory')
+class SubInformation(models.Model):
+    cat = models.ForeignKey(to=Information, on_delete=models.CASCADE, verbose_name='Категория', related_name='subinfo')
     title = models.CharField(_('Название'), max_length=300)
-    slug = models.SlugField('СЛАГ', editable=False, unique=True, null=True, blank=True)
+    slug = models.SlugField('СЛАГ', unique=True, blank=True)
     description = CKEditor5Field(_('Информация'), config_name='default', blank=True, null=True)
 
 
@@ -73,3 +60,14 @@ class SubCategory(models.Model):
     class Meta:
         verbose_name = 'Подкатегория информация'
         verbose_name_plural = 'Подкатегория информации'
+
+
+class FAQ(models.Model):
+    language = models.CharField(_("Язык"), choices=LANG, default='ru', max_length=255)
+    slug = models.SlugField('СЛАГ', unique=True, blank=True)
+    question = models.CharField(_('Вопрос'), max_length=255)
+    answer = CKEditor5Field(_('Ответ'),config_name='default')
+
+    class Meta:
+        verbose_name = 'Частые вопросы'
+        verbose_name_plural = 'Частые вопросы'

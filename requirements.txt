@@ -68,7 +68,6 @@ Pint==0.24.4
 platformdirs==4.3.6
 prettytable==3.15.1
 prometheus_client==0.21.1
-psycopg2==2.9.10
 pydantic==2.10.6
 pydantic-settings==2.8.1
 pydantic_core==2.27.2
