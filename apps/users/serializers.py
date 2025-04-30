@@ -82,3 +82,13 @@ class PersonalSerializers(serializers.ModelSerializer):
         fields = ['first_name', 'email']
 
 
+class SetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True, validators=[validate_password])
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        if data['password'] != data['confirm_password']:
+            raise serializers.ValidationError("Пароли не совпадают.")
+        return data
+
+

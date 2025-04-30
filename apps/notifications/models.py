@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django_ckeditor_5.fields import CKEditor5Field
+from ckeditor_uploader.fields import RichTextUploadingField
 from apps.users.models import User
 
 class DeviceToken(models.Model):
@@ -19,7 +19,7 @@ class DeviceToken(models.Model):
 class Notifications(models.Model):
     devices = models.ManyToManyField("DeviceToken", blank=True)
     title = models.CharField(_('Уведомление'),  max_length=255)
-    description = CKEditor5Field(_("Описание"),config_name='default', blank=True, null=True)
+    description = RichTextUploadingField(_("Описание"),config_name='default', blank=True, null=True)
     sendtoall = models.BooleanField(_("Отправить всем"), default=True)
     image = models.ImageField(_('Изображение'), upload_to='notifications/', null=True, blank=True)
 

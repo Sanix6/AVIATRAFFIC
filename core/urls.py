@@ -3,13 +3,16 @@ from django.urls import path, include
 from .swagger import doc_urlpatterns
 from django.conf import settings
 from django.conf.urls.static import static
+from ckeditor_uploader import views as ckeditor_views
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.users.urls')),
     path('', include('apps.home.urls')),
     path('', include('apps.avia.urls')),
-    path('ckeditor5/', include('django_ckeditor_5.urls')),
+    path('api/ckeditor/', include('ckeditor_uploader.urls')),
+    path('ckeditor/browse/', ckeditor_views.browse, name='ckeditor_browse'),
 
 ]
 if settings.DEBUG:

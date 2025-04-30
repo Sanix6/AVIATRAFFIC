@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import mark_safe
 from .models import Banner, PopularDirection, Information, SubInformation, FAQ
+from assets.forms import *
 
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):

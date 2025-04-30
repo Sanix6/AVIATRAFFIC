@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
-from django_ckeditor_5.fields import CKEditor5Field
+from ckeditor_uploader.fields import RichTextUploadingField
 from assets.choices import LANG
 
 class Banner(models.Model):
@@ -31,7 +31,12 @@ class Information(models.Model):
     title = models.CharField(_('Название'), max_length=255)
     slug = models.SlugField('СЛАГ', unique=True, blank=True)
     img = models.ImageField('Логотип', upload_to='informations/')
-    description = CKEditor5Field(_('Информация'), config_name='default', blank=True, null=True)
+    background_color = models.CharField(
+        'Цвет фона', max_length=20, default='#ffffff',
+        help_text='Например, #f0f8ff, red, rgb(255,255,255)', null=True, blank=True
+    )
+    description = RichTextUploadingField(_('Информация'), config_name='default', blank=True, null=True)
+    
 
     def __str__(self):
         return self.title
@@ -44,8 +49,9 @@ class Information(models.Model):
 class SubInformation(models.Model):
     cat = models.ForeignKey(to=Information, on_delete=models.CASCADE, verbose_name='Категория', related_name='subinfo')
     title = models.CharField(_('Название'), max_length=300)
+    subject = models.CharField(_('Cодержимое'), max_length=255, null=True, blank=True)
     slug = models.SlugField('СЛАГ', unique=True, blank=True)
-    description = CKEditor5Field(_('Информация'), config_name='default', blank=True, null=True)
+    description = RichTextUploadingField(_('Информация'), config_name='default', blank=True, null=True)
 
 
     def save(self, *args, **kwargs):
@@ -66,7 +72,7 @@ class FAQ(models.Model):
     language = models.CharField(_("Язык"), choices=LANG, default='ru', max_length=255)
     slug = models.SlugField('СЛАГ', unique=True, blank=True)
     question = models.CharField(_('Вопрос'), max_length=255)
-    answer = CKEditor5Field(_('Ответ'),config_name='default')
+    answer = RichTextUploadingField(_('Ответ'),config_name='default')
 
     class Meta:
         verbose_name = 'Частые вопросы'

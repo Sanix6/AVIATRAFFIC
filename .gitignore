@@ -1,3 +1,5 @@
 .idea   
 .github
 .envenv/
+.logs
+.assets/sirena

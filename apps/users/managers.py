@@ -1,16 +1,16 @@
 from django.contrib.auth.models import BaseUserManager
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError('Электронная почта не может быть пустым')
+    def create_user(self, phone, password=None, **extra_fields):
+        if not phone:
+            raise ValueError('Это поля не может быть пустым')
 
-        user = self.model(email=email, **extra_fields)
+        user = self.model(phone=phone, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, phone, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
@@ -20,4 +20,4 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Суперпользователь должен быть is_superuser=True.')
 
-        return self.create_user(email, password, **extra_fields)
+        return self.create_user(phone, password, **extra_fields)

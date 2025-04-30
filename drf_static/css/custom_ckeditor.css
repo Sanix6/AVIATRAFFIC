@@ -1,0 +1,6 @@
+.ck-editor__editable {
+    resize: both;
+    overflow: auto;
+    min-height: 200px;
+    min-width: 300px;
+}
