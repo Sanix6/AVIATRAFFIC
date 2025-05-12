@@ -2,4 +2,4 @@
 .github
 .envenv/
 .logs
-.assets/sirena
+.sirena/settings.py
