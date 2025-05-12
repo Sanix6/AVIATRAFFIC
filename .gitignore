@@ -1,5 +1,5 @@
 .idea   
 .github
-.envenv/
+.env/
 .logs
 .sirena/settings.py
