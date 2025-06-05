@@ -1,0 +1,57 @@
+=== Новый запрос ===
+request.data:
+{'segments': [{'departure': 'MOW', 'arrival': 'LED', 'date': '04.06.25'}], 'passengers': [{'code': 'ADT', 'count': 1}], 'currency': 'RUB'}
+
+xml_request:
+<?xml version='1.0' encoding='utf-8'?>
+<sirena><query><pricing_route><segment><departure>MOW</departure><arrival>LED</arrival><date>04.06.25</date></segment><passenger><code>ADT</code><count>1</count></passenger><currency>RUB</currency></pricing_route></query></sirena>
+
+xml_response:
+<?xml version='1.0' encoding='UTF-8'?>
+<sirena><answer pult='ТФК293' msgid='12345' time='10:58:29 04.06.2025' instance='ГРУ'>
+<pricing_route results="all"/>
+  </answer>
+</sirena>
+
+====================
+
+=== Новый запрос ===
+request.data:
+{'segments': [{'departure': 'DME', 'arrival': 'LED', 'date': '04.06.25'}], 'passengers': [{'code': 'ADT', 'count': 1}], 'currency': 'RUB'}
+
+xml_request:
+<?xml version='1.0' encoding='utf-8'?>
+<sirena><query><pricing_route><segment><departure>DME</departure><arrival>LED</arrival><date>04.06.25</date></segment><passenger><code>ADT</code><count>1</count></passenger><currency>RUB</currency></pricing_route></query></sirena>
+
+xml_response:
+<?xml version="1.0" encoding="UTF-8"?>
+<sirena>
+  <answer pult="ТФК293" msgid="12345" time="10:59:46 04.06.2025" instance="ГРУ">
+    <pricing_route results="all"/>
+  </answer>
+</sirena>
+
+====================
+
+=== Новый запрос ===
+request.data:
+{'segments': [{'departure': 'FRU', 'arrival': 'ABA', 'date': '04.06.25'}], 'passengers': [{'code': 'ADT', 'count': 1}], 'currency': 'RUB'}
+
+xml_request:
+<?xml version='1.0' encoding='utf-8'?>
+<sirena><query><pricing_route><segment><departure>FRU</departure><arrival>ABA</arrival><date>04.06.25</date></segment><passenger><code>ADT</code><count>1</count></passenger><currency>RUB</currency></pricing_route></query></sirena>
+
+xml_response:
+<?xml version="1.0" encoding="UTF-8"?>
+<sirena>
+  <answer pult="ТФК293" msgid="12345" time="11:04:18 04.06.2025" instance="ГРУ">
+    <pricing_route>
+      <info>
+        <warning level="notice" missing="flights" segment="1">На сегменте 1 не найдено подходящих рейсов</warning>
+      </info>
+    </pricing_route>
+  </answer>
+</sirena>
+
+====================
+

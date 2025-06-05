@@ -1,49 +1,95 @@
+from datetime import datetime, date
 from lxml import etree
-from sirena.settings import SIRENA_HOST, SIRENA_PORT
-from sirena.client import send_xml_to_sirena
 
-def build_availability_request(departure, arrival, date=None):
+
+def format_date(raw_date):
+    return raw_date.strftime("%d.%m.%y") if isinstance(raw_date, (datetime, date)) else raw_date
+
+def build_segment_element(pricing, seg):
+    segment = etree.SubElement(pricing, "segment")
+    etree.SubElement(segment, "departure").text = seg["departure"]
+    etree.SubElement(segment, "arrival").text = seg["arrival"]
+    etree.SubElement(segment, "date").text = format_date(seg["date"])
+
+
+def build_passenger_element(pricing, pax):
+    passenger = etree.SubElement(pricing, "passenger")
+    etree.SubElement(passenger, "code").text = pax.get("code", "ADT")
+    etree.SubElement(passenger, "count").text = str(pax.get("count", 1))
+
+
+def build_pricing_route_request(data):
     root = etree.Element("sirena")
-    query = etree.SubElement(root, "query")
-    availability = etree.SubElement(query, "availability")
+    pricing = etree.SubElement(etree.SubElement(root, "query"), "pricing_route")
 
-    etree.SubElement(availability, "departure").text = departure
-    etree.SubElement(availability, "arrival").text = arrival
+    for seg in data["segments"]:
+        build_segment_element(pricing, seg)
 
-    if date:
-        etree.SubElement(availability, "date").text = date
+    for pax in data["passengers"]:
+        build_passenger_element(pricing, pax)
 
-    req_params = etree.SubElement(availability, "request_params")
-    etree.SubElement(req_params, "joint_type").text = "jtAll"
+    etree.SubElement(pricing, "currency").text = data["currency"]
 
-    return etree.tostring(root, pretty_print=True, encoding="UTF-8", xml_declaration=True)
+    return etree.tostring(root, encoding="utf-8", xml_declaration=True)
 
 
 
-def parse_availability_response(xml_data):
-    tree = etree.fromstring(xml_data)
-    flights = []
-    
-    for flight in tree.xpath("//flight"):
-        flights.append({
-            "company": flight.findtext("company"),
-            "num": flight.findtext("num"),
-            "origin": flight.findtext("origin"),
-            "destination": flight.findtext("destination"),
-            "depttime": flight.findtext("depttime"),
-            "arrvtime": flight.findtext("arrvtime"),
-            "airplane": flight.findtext("airplane"),
-            "subclasses": [
-                {
-                    "code": sc.text,
-                    "count": sc.attrib.get("count")
-                } for sc in flight.findall("subclass")
-            ],
+def parse_tax_elements(price_elem):
+    return [
+        {"code": tax.get("code"), "amount": tax.text}
+        for tax in price_elem.findall("tax")
+    ] if price_elem is not None else []
+
+
+def parse_bag_elements(elements):
+    result = []
+    for bag in elements:
+        entry = {
+            "company": bag.findtext("company"),
+            "value": bag.findtext("value"),
+            "type": bag.findtext("type")
+        }
+        result.append(entry)
+    return result
+
+
+def parse_pricing_response(xml_bytes):
+    root = etree.fromstring(xml_bytes)
+    variants = root.xpath("//answer/pricing_route/variant")
+
+    results = []
+    for var in variants:
+        price_elem = var.find("variant_total")
+        flights = []
+        for fl in var.findall("flight"):
+            fl_price = fl.find(".//price")
+            flights.append({
+                "company": fl.findtext("company"),
+                "num": fl.findtext("num"),
+                "origin": fl.findtext("origin"),
+                "destination": fl.findtext("destination"),
+                "depttime": fl.findtext("depttime"),
+                "arrvtime": fl.findtext("arrvtime"),
+                "classes": [cls.text for cls in fl.findall("class")],
+                "available": fl.findtext("available"),
+                "airplane": fl.findtext("airplane"),
+                "mileage": fl.findtext("mileage"),
+                "subclass": fl.findtext("subclass"),
+                "meal": fl.findtext("meal"),
+                "price": {
+                    "total": fl_price.findtext("total") if fl_price is not None else None,
+                    "currency": fl_price.get("currency") if fl_price is not None else None,
+                    "fare": fl_price.findtext("fare") if fl_price is not None else None,
+                    "taxes": parse_tax_elements(fl_price)
+                }
+            })
+
+        results.append({
+            "flights": flights,
+            "total_price": price_elem.text if price_elem is not None else None,
+            "currency": price_elem.get("currency") if price_elem is not None else None,
+            "baggage_info": parse_bag_elements(var.findall(".//bag_norm_full/free_bag_norm"), include_prohibited=True),
+            "carry_on_info": parse_bag_elements(var.findall(".//bag_norm_full/free_carry_on"))
         })
 
-    return {"flights": flights}
-
-def search_flights(from_code, to_code, date):
-    xml_request = build_availability_request(from_code, to_code, date)
-    xml_response = send_xml_to_sirena(xml_request, SIRENA_HOST, SIRENA_PORT)
-    return parse_availability_response(xml_response)
+    return results

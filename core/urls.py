@@ -8,9 +8,9 @@ from ckeditor_uploader import views as ckeditor_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('apps.users.urls')),
-    path('', include('apps.home.urls')),
-    path('', include('apps.avia.urls')),
+    path('auth/', include('apps.users.urls')),
+    path('base/', include('apps.home.urls')),
+    path('avia/', include('apps.avia.urls')),
     path('api/ckeditor/', include('ckeditor_uploader.urls')),
     path('ckeditor/browse/', ckeditor_views.browse, name='ckeditor_browse'),
 

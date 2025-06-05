@@ -1,5 +1,9 @@
 .idea   
-.github
+.github/
 .env/
-.logs
+.logs/
 .sirena/settings.py
+.gitattributes/
+.docker-compose.yml/
+.Dockerfile/
+.vscode/

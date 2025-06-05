@@ -1,15 +1,29 @@
-import socket 
+import zlib
+import socket
+import struct
+import time
 
+def send_tcp_request(xml_data):
+    compressed = zlib.compress(xml_data)
+    msg_id = 12345
+    timestamp = int(time.time())
+    cid = 5149
 
-def send_xml_to_sirena(xml: str, host: str, port: str, timeout=10) -> str:
-    with socket.create_connection((host, port), timeout=timeout) as sock:
-        sock.sendall(xml.encode('utf-8'))
+    header = bytearray(100)
+    struct.pack_into("!I", header, 0, len(compressed))  
+    struct.pack_into("!I", header, 4, timestamp)
+    struct.pack_into("!I", header, 8, msg_id)
+    struct.pack_into("!H", header, 44, cid)
+    struct.pack_into("!B", header, 46, 0x04)
 
-        response = b""
-        while True:
-            part = sock.recv(4096)
-            if not part:
-                break
-            response += part
+    payload = header + compressed
 
-        return response.decode('utf-8')
+    with socket.create_connection(("193.104.87.251", 34323), timeout=10) as sock:
+        sock.sendall(payload)
+        response_header = sock.recv(100)
+        resp_len = struct.unpack_from("!I", response_header)[0]
+        resp_data = b""
+        while len(resp_data) < resp_len:
+            resp_data += sock.recv(resp_len - len(resp_data))
+
+    return zlib.decompress(resp_data)
