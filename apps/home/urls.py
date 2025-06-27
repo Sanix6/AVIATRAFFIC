@@ -4,7 +4,7 @@ from .views import BaseView, FAQDetailAPIView, FAQListAPIView
 
 
 router = DefaultRouter()
-router.register(r'base', BaseView, basename='auth'),
+router.register(r'', BaseView, basename='auth'),
 
 
 urlpatterns = [

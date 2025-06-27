@@ -116,11 +116,13 @@ CKEDITOR_UPLOAD_PATH = 'uploads/'
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
+    # "https://aviatraffic.vercel.app",
     "http://77.222.58.149",
     "http://localhost:5173",  
 ]
 
 CSRF_TRUSTED_ORIGINS = [
+    # "https://aviatraffic.vercel.app",
     "http://77.222.58.149",
     "http://localhost:5173", 
 ]

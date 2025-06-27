@@ -1,13 +1,10 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 from apps.avia.views import *
 
-router = DefaultRouter()
-router.register(r'', AviaParamsView, basename='avia')
-
 urlpatterns = [
-    path('', include(router.urls)),
-    path("search-ticket/", SearchTicketView.as_view(), name="sirena-proxy"),
-    path('cities/', ConnectedCitiesView.as_view(), name='cities'),
-
+    path("search-ticket/", SearchTicketView.as_view()),
+    path("raceinfo/", RaceInfoView.as_view()),
+    path("booking/", BookingView.as_view()),
+    path("booking-detail/", BookingDetail.as_view()),
+    path("booking/cancel/", BookingCancelView.as_view())
 ]

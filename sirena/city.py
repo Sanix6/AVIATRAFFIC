@@ -26,3 +26,4 @@ def pars_connected_cities(xml_bytes):
         result['cities_from'] = [city.text for city in cities_from.findall('city')]
 
     return result
+

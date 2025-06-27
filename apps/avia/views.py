@@ -2,34 +2,33 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import generics, status, viewsets
 from rest_framework.views import APIView
-import xml.etree.ElementTree as ET
-from apps.avia.models import *
-from apps.avia.serializers import *
-from sirena.client import *
-from sirena.search import *
-from sirena.settings import *
-from sirena.city import *
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
-class AviaParamsView(viewsets.ViewSet):
-    @action(detail=False, methods=['get'], url_path='params')
-    def get_city(self, request):
-        queryset = Countries.objects.all()
-        serilizer = CountrySerializer(queryset, many=True)
-        return Response({'contiries': serilizer.data})
 
+from apps.avia.models import Countries
+from apps.avia import serializers
+
+from sirena import client, search, city, offers, booking
 
 
 class SearchTicketView(generics.GenericAPIView):
-    serializer_class = PricingRouteRequestSerializer
+    serializer_class = serializers.PricingRouteSerializer
 
+    @swagger_auto_schema(
+        operation_description="Поиск авиабилетов",
+        request_body=serializers.PricingRouteSerializer,
+        responses={200: "Успешный ответ с вариантами перевозки"}
+    )
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
 
-        xml_request = build_pricing_route_request(validated_data)
-        xml_response = send_tcp_request(xml_request)
-        result = parse_pricing_response(xml_response)
+        xml_request = search.build_pricing_route_request(validated_data)
+        xml_response = client.send_tcp_request(xml_request)
+        result = search.parse_pricing_response(xml_response)
 
         if not result:
             return Response({
@@ -37,122 +36,96 @@ class SearchTicketView(generics.GenericAPIView):
             }, status=status.HTTP_200_OK)
 
         return Response(result, status=status.HTTP_200_OK)
-    
 
-class ConnectedCitiesView(generics.GenericAPIView):
-    serializer_class = ConnectedCitiesSerializer
+
+
+class RaceInfoView(generics.GenericAPIView):
+    serializer_class = serializers.RaceInfoSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
-        xml_data = get_connected_cities(
-            "instance_name", {
-            'point': data['point'],
-            'from': data['from_'],
-            'to': data['to_'],})
-        response_bytes = send_tcp_request(xml_data)
-        result = pars_connected_cities(response_bytes)
-        return Response(result, status=status.HTTP_200_OK)
-           
+        validated = serializer.validated_data
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from lxml import etree
-import zlib
-import socket
-import struct
-import time
-
-class SirenaAvailabilityView(APIView):
-    def post(self, request, *args, **kwargs):
-        data = request.data
-
-        if "availability" not in data:
-            return Response({"error": "Missing 'availability' key"}, status=status.HTTP_400_BAD_REQUEST)
+        request_xml = offers.build_raceinfo_request({
+            "company": validated["company"],
+            "flight": validated["flight"],
+            "date": validated.get("date"),
+            "answer_params": {
+                "show_flighttime": validated.get("show_flighttime", False),
+                "show_baseclass": validated.get("show_baseclass", False),
+            }
+        })
 
         try:
-            xml_data = self.build_request_xml(data)
-            raw_response = self.send_tcp_request(xml_data)
-            parsed_response = self.parse_response_xml(raw_response)
-            return Response(parsed_response, status=status.HTTP_200_OK)
+            response_xml = client.send_tcp_request(request_xml)
+            response_data = offers.parse_raceinfo_response(response_xml)
+            return Response(response_data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+    
+class BookingView(generics.GenericAPIView):
+    serializer_class = serializers.BookingRequestSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        booking_data = serializer.validated_data
+
+        try:
+            xml_str = booking.build_booking_xml(booking_data)
+            raw_xml = xml_str.encode('utf-8')
+            xml_response_bytes = client.send_tcp_request(raw_xml)
+            xml_response = xml_response_bytes.decode('utf-8')
+            result = booking.parse_booking_response(xml_response)
+            return Response(result, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def build_request_xml(self, data):
-        root = etree.Element("sirena")
-        query = etree.SubElement(root, "query")
 
-        for avail in data["availability"]:
-            availability = etree.SubElement(query, "availability")
-            for key, value in avail.items():
-                if key == "subclass":
-                    for subclass in value:
-                        etree.SubElement(availability, "subclass").text = subclass
-                elif key == "request_params":
-                    request_params = etree.SubElement(availability, "request_params")
-                    for param_key, param_value in value.items():
-                        etree.SubElement(request_params, param_key).text = param_value
-                else:
-                    etree.SubElement(availability, key).text = value
+class BookingDetail(APIView):
+    @swagger_auto_schema(
+        operation_summary="Получить детали бронирования по фамилии и номеру брони",
+        request_body=serializers.OrderRequestSerializer,
+        responses={200: openapi.Response("Информация о брони", serializers.OrderRequestSerializer)}
+    )
+    def post(self, request):
+        serializer = serializers.OrderRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        return etree.tostring(root, encoding='utf-8', xml_declaration=True)
+        surname = serializer.validated_data["surname"]
+        regnum = serializer.validated_data["regnum"]
 
-    def send_tcp_request(self, xml_data):
-        compressed = zlib.compress(xml_data)
-        msg_id = 12345
-        timestamp = int(time.time())
-        cid = 5149
+        xml_request = offers.build_order_request({
+            "surname": surname,
+            "regnum": regnum
+        })
 
-        header = bytearray(100)
-        struct.pack_into("!I", header, 0, len(compressed))
-        struct.pack_into("!I", header, 4, timestamp)
-        struct.pack_into("!I", header, 8, msg_id)
-        struct.pack_into("!H", header, 44, cid)
-        struct.pack_into("!B", header, 46, 0x04)
+        try:
+            xml_response_bytes = client.send_tcp_request(xml_request)
+            parsed_data = offers.parse_order_response(xml_response_bytes)
+            return Response(parsed_data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 
-        payload = header + compressed
 
-        with socket.create_connection(("193.104.87.251", 34323), timeout=10) as sock:
-            sock.sendall(payload)
-            response_header = sock.recv(100)
-            resp_len = struct.unpack_from("!I", response_header)[0]
-            resp_data = b""
-            while len(resp_data) < resp_len:
-                resp_data += sock.recv(resp_len - len(resp_data))
+class BookingCancelView(generics.GenericAPIView):
+    serializer_class = serializers.BookingINFOSerializer
 
-        return zlib.decompress(resp_data)
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    def parse_response_xml(self, xml_bytes):
-        root = etree.fromstring(xml_bytes)
-        results = []
-
-        for availability in root.xpath("//answer/availability"):
-            flights = []
-            for flight in availability.findall("flight"):
-                flight_info = {
-                    "company": flight.findtext("company"),
-                    "num": flight.findtext("num"),
-                    "origin": flight.findtext("origin"),
-                    "destination": flight.findtext("destination"),
-                    "depttime": flight.findtext("depttime"),
-                    "arrvtime": flight.findtext("arrvtime"),
-                    "airplane": flight.findtext("airplane"),
-                    "service_type": flight.findtext("service_type"),
-                    "subclasses": []
-                }
-                for subclass in flight.findall("subclass"):
-                    flight_info["subclasses"].append({
-                        "code": subclass.text,
-                        "count": subclass.get("count")
-                    })
-                flights.append(flight_info)
-
-            results.append({
-                "departure": availability.get("departure"),
-                "arrival": availability.get("arrival"),
-                "flights": flights
-            })
-
-        return results
+        xml_request = booking.build_booking_cancel(serializer.validated_data)
+        try:
+            xml_response = client.send_tcp_request(xml_request)
+            success = booking.parse_booking_cancel_response(xml_response)
+            if success:
+                return Response({"detail": "Бронирование отменено успешно"})
+            return Response({"detail": "Не удалось отменить бронирование"}, status=400)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=500)

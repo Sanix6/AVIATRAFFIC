@@ -14,11 +14,11 @@ class CountriesAdmin(admin.ModelAdmin):
 
     get_img.short_description = 'Изображение'
 
-@admin.register(Cities)
-class CitiesInline(admin.ModelAdmin):
-    list_display = ['name', 'code_name']
+# @admin.register(Cities)
+# class CitiesInline(admin.ModelAdmin):
+#     list_display = ['name', 'code_name']
 
-@admin.register(Airports)
-class AirportsInline(admin.ModelAdmin):
-    # inlines = [CitiesInline]
-    list_display = ['name', 'code_name']
+# @admin.register(Airports)
+# class AirportsInline(admin.ModelAdmin):
+#     # inlines = [CitiesInline]
+#     list_display = ['name', 'code_name']
